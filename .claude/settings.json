@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$json = $input | Out-String | ConvertFrom-Json; if ($json.tool_input.file_path -like '*.env*') { [Console]::Error.WriteLine('.env 수정 금지!'); exit 2 } else { exit 0 }"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "shell": "powershell",
+            "command": "$json = $input | Out-String | ConvertFrom-Json; if ($json.tool_input.command -match 'git commit') { $found = Select-String -Path '*.js' -Pattern 'console.log' -Quiet -ErrorAction SilentlyContinue; if ($found) { [Console]::Error.WriteLine('🚫 JS 파일에 console.log가 남아있어 커밋을 차단합니다! 지워주세요.'); exit 2 } }; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}

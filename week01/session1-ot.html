@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 완전 정복 — 1주차 OT</title>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --card: #22223a;
+    --accent: #d97757;
+    --accent-soft: #e8a086;
+    --text: #f0ede6;
+    --muted: #9a97a8;
+    --green: #7bc47f;
+    --blue: #6ca0dc;
+    --yellow: #e8c468;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; background: var(--bg); font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", -apple-system, sans-serif; color: var(--text); }
+
+  .slide {
+    display: none;
+    position: absolute;
+    inset: 0;
+    padding: 64px 88px;
+    flex-direction: column;
+    justify-content: center;
+    background-size: cover;
+    background-position: center;
+  }
+  .slide.active { display: flex; animation: fadeIn .35s ease; }
+
+  /* Unsplash 배경 (어두운 오버레이 포함) */
+  .bg-cosmos   { background-image: linear-gradient(160deg, rgba(15,15,26,.82), rgba(15,15,26,.68)), url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-mountain { background-image: linear-gradient(160deg, rgba(15,15,26,.85), rgba(15,15,26,.72)), url('https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-circuit  { background-image: linear-gradient(160deg, rgba(15,15,26,.88), rgba(15,15,26,.76)), url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-code     { background-image: linear-gradient(160deg, rgba(15,15,26,.88), rgba(15,15,26,.78)), url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-laptop   { background-image: linear-gradient(160deg, rgba(15,15,26,.88), rgba(15,15,26,.76)), url('https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-aurora   { background-image: linear-gradient(160deg, rgba(15,15,26,.84), rgba(15,15,26,.70)), url('https://images.unsplash.com/photo-1531366936337-7c912a4589a7?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-earth    { background-image: linear-gradient(160deg, rgba(15,15,26,.86), rgba(15,15,26,.74)), url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=2400&q=70'); }
+  .bg-terminal { background-image: linear-gradient(160deg, rgba(15,15,26,.88), rgba(15,15,26,.78)), url('https://images.unsplash.com/photo-1550439062-609e1531270e?auto=format&fit=crop&w=2400&q=70'); }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .kicker { color: var(--accent); font-size: 18px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 16px; }
+  h1 { font-size: 64px; line-height: 1.15; font-weight: 800; }
+  h2 { font-size: 44px; font-weight: 800; margin-bottom: 36px; }
+  h2 .num { color: var(--accent); margin-right: 12px; }
+  .sub { font-size: 24px; color: var(--muted); margin-top: 24px; line-height: 1.5; }
+
+  .pill { display: inline-block; background: rgba(255,255,255,.08); backdrop-filter: blur(16px) saturate(150%); -webkit-backdrop-filter: blur(16px) saturate(150%); border: 1px solid rgba(255,255,255,.16); border-radius: 999px; padding: 8px 20px; font-size: 17px; color: var(--muted); margin: 6px 8px 0 0; }
+  .pill b { color: var(--text); }
+
+  ul.big { list-style: none; font-size: 25px; line-height: 1.5; }
+  ul.big li { padding: 14px 0 14px 40px; position: relative; border-bottom: 1px solid #ffffff10; }
+  ul.big li::before { content: "▸"; position: absolute; left: 6px; color: var(--accent); }
+  ul.big li small { display: block; font-size: 18px; color: var(--muted); margin-top: 4px; }
+
+  .grid { display: grid; gap: 20px; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card { background: rgba(255,255,255,.07); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,.15); border-radius: 16px; padding: 26px 28px; box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+  .card h3 { font-size: 22px; margin-bottom: 10px; color: var(--accent-soft); }
+  .card p, .card li { font-size: 18px; line-height: 1.55; color: var(--text); }
+  .card .tag { display: inline-block; font-size: 14px; background: #ffffff12; border-radius: 6px; padding: 3px 10px; margin: 8px 6px 0 0; color: var(--muted); }
+
+  .member { display: flex; flex-direction: column; gap: 6px; }
+  .member .name { font-size: 22px; font-weight: 700; }
+  .member .name span { color: var(--accent-soft); font-size: 17px; font-weight: 500; margin-left: 8px; }
+  .member .goal { font-size: 16px; color: var(--muted); line-height: 1.45; }
+
+  .timeline { display: flex; gap: 16px; margin-top: 8px; }
+  .week { flex: 1; background: rgba(255,255,255,.07); backdrop-filter: blur(20px) saturate(150%); -webkit-backdrop-filter: blur(20px) saturate(150%); border: 1px solid rgba(255,255,255,.12); border-top: 4px solid var(--accent); border-radius: 14px; padding: 22px 18px; box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+  .week.p2 { border-top-color: var(--blue); }
+  .week .w { font-size: 15px; font-weight: 800; color: var(--accent); letter-spacing: .06em; }
+  .week.p2 .w { color: var(--blue); }
+  .week h4 { font-size: 19px; margin: 8px 0 10px; }
+  .week p { font-size: 15px; color: var(--muted); line-height: 1.5; }
+
+  .code { background: rgba(5,5,15,.55); backdrop-filter: blur(20px) saturate(140%); -webkit-backdrop-filter: blur(20px) saturate(140%); border: 1px solid rgba(255,255,255,.12); border-radius: 12px; padding: 20px 24px; font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; font-size: 19px; line-height: 1.8; color: var(--green); box-shadow: 0 8px 32px rgba(0,0,0,.35); }
+  .code .c { color: var(--muted); }
+  .code .p { color: var(--accent-soft); }
+
+  .footer { position: fixed; bottom: 22px; left: 0; right: 0; display: flex; justify-content: space-between; padding: 0 40px; font-size: 14px; color: var(--muted); z-index: 10; }
+  .progress { position: fixed; top: 0; left: 0; height: 4px; background: var(--accent); transition: width .3s ease; z-index: 10; }
+
+  .title-slide { align-items: flex-start; }
+  .logo-mark { font-size: 80px; margin-bottom: 24px; }
+
+  .big-q { font-size: 40px; line-height: 1.4; font-weight: 700; }
+  .big-q em { color: var(--accent); font-style: normal; }
+
+  table.agenda { width: 100%; border-collapse: collapse; font-size: 22px; }
+  table.agenda td { padding: 18px 12px; border-bottom: 1px solid #ffffff12; }
+  table.agenda td.t { color: var(--accent); font-weight: 700; width: 140px; font-variant-numeric: tabular-nums; }
+  table.agenda td.d { color: var(--muted); font-size: 18px; }
+
+  /* PDF 출력용 — 모든 슬라이드를 페이지당 1장씩 */
+  @page { size: 1600px 900px; margin: 0; }
+  @media print {
+    html, body { overflow: visible; height: auto; background: var(--bg); }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .slide { display: flex !important; position: relative; inset: auto; width: 1600px; height: 900px; page-break-after: always; break-inside: avoid; animation: none; }
+    .footer, .progress { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<!-- 1. 타이틀 -->
+<section class="slide title-slide bg-cosmos active">
+  <div class="logo-mark">✳️</div>
+  <div class="kicker">SummerCoding 2026 · LLM 스터디</div>
+  <h1>Claude Code<br>완전 정복</h1>
+  <p class="sub">1주차 — OT & 기본 세팅</p>
+  <div style="margin-top:32px">
+    <span class="pill">📅 <b>2026. 07. 12 (일) 20:00 – 22:00</b></span>
+    <span class="pill">💻 <b>온라인</b></span>
+    <span class="pill">🧑‍🏫 멘토 <b>최용 · 최승위</b></span>
+  </div>
+</section>
+
+<!-- 2. 오늘의 순서 -->
+<section class="slide bg-mountain">
+  <h2><span class="num">00</span>오늘의 순서</h2>
+  <table class="agenda">
+    <tr><td class="t">20:00</td><td>OT — 스터디 & 멘토 소개, 운영 방식</td><td class="d">15분</td></tr>
+    <tr><td class="t">20:15</td><td>아이스브레이킹 & 멤버 자기소개</td><td class="d">35분</td></tr>
+    <tr><td class="t">20:50</td><td>6주 커리큘럼 구체 소개</td><td class="d">20분</td></tr>
+    <tr><td class="t">21:10</td><td>기본 세팅 — VS Code + Claude Code 튜토리얼</td><td class="d">40분</td></tr>
+    <tr><td class="t">21:50</td><td>Q&A & 다음 주 안내</td><td class="d">10분</td></tr>
+  </table>
+  <p class="sub">⏱ 총 2시간 진행 · 중간에 5분 휴식 있어요</p>
+</section>
+
+<!-- 3. 멘토 소개 -->
+<section class="slide bg-earth">
+  <h2><span class="num">01</span>멘토 소개</h2>
+  <div class="grid cols-2">
+    <div class="card" style="padding:36px 34px">
+      <div style="font-size:52px; margin-bottom:14px">🧑‍🏫</div>
+      <h3 style="font-size:30px; color:var(--text)">최용 <span style="font-size:17px; color:var(--muted); font-weight:500">soaryong</span></h3>
+      <p style="color:var(--muted); margin:6px 0 16px">땅울림 05학번 · 인하대 컴퓨터공학</p>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; font-size:17px">
+        <li>💼 현) <b>DSRV</b> Developer — 블록체인 인프라</li>
+        <li>🏆 ACM-ICPC 수상 (2009)</li>
+        <li>🎸 반디 · 땅울림 · CTP 동아리 출신</li>
+      </ul>
+      <p style="margin-top:16px">🔗 <a href="https://www.linkedin.com/in/soaryong/" style="color:var(--blue); text-decoration:none">linkedin.com/in/soaryong</a></p>
+    </div>
+    <div class="card" style="padding:36px 34px">
+      <div style="font-size:52px; margin-bottom:14px">🧑‍🏫</div>
+      <h3 style="font-size:30px; color:var(--text)">최승위 <span style="font-size:17px; color:var(--muted); font-weight:500">positiwee</span></h3>
+      <p style="color:var(--muted); margin:6px 0 16px">땅울림 11학번 · 인하대 컴퓨터공학</p>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:8px; font-size:17px">
+        <li>💼 현) <b>LINE</b> Software Engineer</li>
+        <li>🌱 LANDVIBE SummerCoding 멘토</li>
+        <li>🤖 AI 에이전트 워크플로우 헤비유저</li>
+      </ul>
+      <p style="margin-top:16px">🔗 <a href="https://www.linkedin.com/in/positiwee/" style="color:var(--blue); text-decoration:none">linkedin.com/in/positiwee</a></p>
+    </div>
+  </div>
+  <p class="sub">👥 실전 프로젝트(3~6주차)는 <b style="color:var(--text)">두 그룹으로 나누어</b> 멘토가 각 그룹의 프로젝트를 전담 멘토링합니다</p>
+</section>
+
+<!-- 4. 왜 이 스터디인가 -->
+<section class="slide bg-circuit">
+  <h2><span class="num">01</span>왜 Claude Code인가?</h2>
+  <p class="big-q">"AI가 코드를 짜주는 시대,<br>차이를 만드는 건 <em>AI에게 일을 잘 시키는 능력</em>입니다."</p>
+  <div class="grid cols-3" style="margin-top:48px">
+    <div class="card"><h3>🤖 에이전트 코딩</h3><p>단순 자동완성이 아니라, 탐색→계획→구현→검증을 스스로 수행하는 AI 에이전트</p></div>
+    <div class="card"><h3>📖 공식 문서 기반</h3><p>블로그 글 짜깁기가 아닌 공식 문서로 체계적으로 학습</p></div>
+    <div class="card"><h3>🚀 실전 프로젝트</h3><p>배운 것을 6주 안에 나만의 프로젝트로 완성 & 배포</p></div>
+  </div>
+</section>
+
+<!-- LLM이란 무엇인가 -->
+<section class="slide bg-cosmos">
+  <h2><span class="num">01</span>본질부터 — LLM이란 무엇인가</h2>
+  <p class="big-q" style="font-size:32px">"인터넷 규모의 텍스트로 학습된, <em>다음 토큰을 예측하는 확률 기계</em>"</p>
+  <div class="grid cols-3" style="margin-top:40px">
+    <div class="card"><h3>🧮 다음 토큰 예측</h3><p style="font-size:16px">하는 일은 단 하나 — "지금까지의 문맥 뒤에 올 가장 그럴듯한 토큰"을 계산. 이게 전부입니다.</p></div>
+    <div class="card"><h3>📈 스케일링 법칙</h3><p style="font-size:16px">데이터·연산·파라미터를 키울수록 성능이 예측 가능하게 상승 — Anthropic 공동창업자 Jared Kaplan의 스케일링 법칙 연구가 이 시대를 열었습니다.</p></div>
+    <div class="card"><h3>✨ 창발 (Emergence)</h3><p style="font-size:16px">"다음 단어 맞히기"를 극한으로 잘하게 되자, 추론·코딩·도구 사용 능력이 따라 나왔습니다. 아무도 명시적으로 가르치지 않았는데도.</p></div>
+  </div>
+  <p class="sub">💬 Dario Amodei(Anthropic CEO)는 이 끝을 <b style="color:var(--text)">"데이터센터 안의 천재들의 나라(a country of geniuses in a datacenter)"</b>라 표현합니다 — 『Machines of Loving Grace』(2024)</p>
+</section>
+
+<!-- LLM 활용의 진화 -->
+<section class="slide bg-earth">
+  <h2><span class="num">01</span>LLM 활용의 진화 — 9년의 타임라인</h2>
+  <div class="timeline">
+    <div class="week"><div class="w">2017</div><h4>Transformer</h4><p>"Attention Is All You Need" — 모든 것의 시작점이 된 아키텍처</p></div>
+    <div class="week"><div class="w">2020</div><h4>GPT-3 · 프롬프팅</h4><p>몇 개의 예시만 주면 새 과제를 수행 — "프롬프트"라는 개념의 탄생</p></div>
+    <div class="week"><div class="w">2021</div><h4>Copilot · 자동완성</h4><p>LLM이 에디터 안으로 — 코드를 "이어 써주는" 시대</p></div>
+    <div class="week"><div class="w">2022</div><h4>ChatGPT · 대화</h4><p>RLHF로 다듬어진 대화형 AI — 개발자가 "물어보는" 시대</p></div>
+    <div class="week p2"><div class="w">2024</div><h4>Tool Use · MCP</h4><p>모델이 도구를 호출하기 시작 — 외부 세계와 연결되는 표준(MCP) 등장</p></div>
+    <div class="week p2"><div class="w">2025~</div><h4>에이전트</h4><p>Claude Code 등장 — 목표를 주면 스스로 일하는 시대, 그리고 지금</p></div>
+  </div>
+  <p class="sub">패러다임이 바뀔 때마다 개발자와 AI의 관계가 바뀌었습니다: <b style="color:var(--text)">이어쓰기 → 물어보기 → 맡기기</b></p>
+</section>
+
+<!-- Claude Code의 본질 -->
+<section class="slide bg-circuit">
+  <h2><span class="num">01</span>Claude Code의 본질 — "자동완성이 아니라 에이전트"</h2>
+  <div class="grid cols-3">
+    <div class="card">
+      <h3>💬 챗봇 (ChatGPT)</h3>
+      <p style="color:var(--muted); font-size:16px">코드를 <b style="color:var(--text)">"알려주는"</b> 도구</p>
+      <p style="font-size:16px; margin-top:10px">질문 → 답변 복사 → 내가 붙여넣고 실행. 내 코드베이스를 모른다.</p>
+    </div>
+    <div class="card">
+      <h3>✨ 자동완성 (Copilot)</h3>
+      <p style="color:var(--muted); font-size:16px">코드를 <b style="color:var(--text)">"이어주는"</b> 도구</p>
+      <p style="font-size:16px; margin-top:10px">내가 타이핑하는 동안 다음 줄 제안. 주도권은 여전히 내 손가락.</p>
+    </div>
+    <div class="card" style="border-color:var(--accent)">
+      <h3>🤖 에이전트 (Claude Code)</h3>
+      <p style="color:var(--accent-soft); font-size:16px">일을 <b style="color:var(--text)">"맡기는"</b> 도구</p>
+      <p style="font-size:16px; margin-top:10px">스스로 코드를 탐색하고 → 계획하고 → 수정하고 → 실행·테스트로 검증한다.</p>
+    </div>
+  </div>
+  <p class="sub">핵심 차이: 코드 조각을 받는 게 아니라, <b style="color:var(--text)">"이 버그 고쳐줘"라는 목표 자체를 위임</b>할 수 있다</p>
+</section>
+
+<!-- Claude Code 해부학 -->
+<section class="slide bg-terminal">
+  <h2><span class="num">01</span>Claude Code 해부학 — 구조는 놀랍도록 단순하다 🔬</h2>
+  <div class="grid cols-2">
+    <div class="code" style="font-size:17px">
+      <div><span class="c">// Claude Code의 본질 = 모델 + 얇은 하네스</span></div>
+      <div><span class="p">while</span> (!done) {</div>
+      <div>&nbsp;&nbsp;context = gather(<span class="c">파일, git, CLAUDE.md</span>)</div>
+      <div>&nbsp;&nbsp;action&nbsp; = model.think(<span class="c">목표, context</span>)</div>
+      <div>&nbsp;&nbsp;result&nbsp; = tools.run(action) <span class="c">// Read·Edit·Bash·Search</span></div>
+      <div>&nbsp;&nbsp;done&nbsp;&nbsp;&nbsp; = verify(result)&nbsp;&nbsp;&nbsp; <span class="c">// 테스트·빌드로 검증</span></div>
+      <div>}</div>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:16px">
+      <div class="card"><h3>🧠 지능은 전부 모델에</h3><p style="font-size:16px">복잡한 파이프라인 없음. 탐색·계획·수정·검증을 결정하는 건 루프가 아니라 모델 자신</p></div>
+      <div class="card"><h3>🔧 하네스는 손과 발만</h3><p style="font-size:16px">파일 읽기/쓰기, 터미널, 검색 — 도구와 권한 시스템만 제공하는 의도적으로 얇은 껍데기</p></div>
+    </div>
+  </div>
+  <p class="sub">💬 "Claude Code는 의도적으로 저수준이고 무의견(unopinionated)합니다 — 날것에 가까운 모델 접근을 제공합니다" — Boris Cherny, Claude Code 창시자 (Anthropic 엔지니어링 블로그)</p>
+</section>
+
+<!-- 드라마틱한 일이 벌어지는 조건 -->
+<section class="slide bg-cosmos">
+  <h2><span class="num">01</span>드라마틱한 일이 벌어지는 조건 ⚡</h2>
+  <p class="sub" style="margin:0 0 28px">같은 도구인데 누구는 10배 생산성, 누구는 "별로던데요?" — 마법이 아니라 <b style="color:var(--text)">조건</b>의 문제입니다</p>
+  <div class="grid cols-2">
+    <div class="card"><h3>1️⃣ 명확한 목표</h3><p style="font-size:16px">"로그인 버그 고쳐줘"보다 "이 재현 절차로 발생하는 401 오류를 고쳐줘" — 목표가 구체적일수록 결과가 극적</p></div>
+    <div class="card"><h3>2️⃣ 검증 가능한 피드백 루프</h3><p style="font-size:16px">테스트·컴파일러·린터가 있으면 AI는 스스로 틀림을 발견하고 고칩니다. Anthropic 연구진이 말하는 발전의 핵심 조건 — "검증 가능한 보상"</p></div>
+    <div class="card"><h3>3️⃣ 풍부한 맥락</h3><p style="font-size:16px">CLAUDE.md, 좋은 README, 정돈된 코드베이스 — 신입 개발자에게 주듯 맥락을 주면 그만큼 일합니다</p></div>
+    <div class="card"><h3>4️⃣ 위임의 크기와 반복</h3><p style="font-size:16px">한 줄씩 시키면 자동완성, 목표째 맡기고 반복시키면 에이전트 — 위임 단위가 클수록 드라마가 커집니다</p></div>
+  </div>
+  <p class="sub">💬 "3~6개월 안에 AI가 코드의 90%를 쓰게 될 것" — Dario Amodei (2025.3) · 이 조건들을 갖추는 사람부터 그 90%의 수혜자가 됩니다</p>
+</section>
+
+<!-- 개발자의 역할 변화 -->
+<section class="slide bg-circuit">
+  <h2><span class="num">01</span>그래서 무엇이 바뀌는가 — 개발자의 역할</h2>
+  <p class="big-q" style="font-size:34px">타이핑하는 사람 ✍️ &nbsp;→&nbsp; <em>방향을 잡고 검증하는 사람</em> 🧭</p>
+  <div class="grid cols-3" style="margin-top:40px">
+    <div class="card"><h3>🎯 문제 정의</h3><p style="font-size:16px">"뭘 만들지, 어디까지 만들지"를 명확히 말하는 능력이 코드 실력만큼 중요해진다</p></div>
+    <div class="card"><h3>📋 맥락 제공</h3><p style="font-size:16px">CLAUDE.md, 좋은 프롬프트, 프로젝트 규칙 — AI가 일 잘하게 만드는 환경 설계</p></div>
+    <div class="card"><h3>🔍 검증 & 책임</h3><p style="font-size:16px">AI의 결과물을 읽고, 테스트하고, 최종 판단하는 건 여전히 사람의 몫</p></div>
+  </div>
+  <p class="sub">💡 AI가 대체하는 건 개발자가 아니라 <b style="color:var(--text)">타이핑</b> — 이 6주는 "위임하고 검증하는 근육"을 기르는 시간입니다</p>
+</section>
+
+<!-- 4. 스터디 개요 -->
+<section class="slide bg-code">
+  <h2><span class="num">01</span>스터디 개요</h2>
+  <ul class="big">
+    <li><b>기간</b> — 2026. 7. 6 ~ 8. 16 (6주)<small>주 1회 온라인 모임 + 주중 개인 학습/실습</small></li>
+    <li><b>인원</b> — 멘토 2명 + 멤버 10명</li>
+    <li><b>목표</b> — Claude Code 기본기 습득 → 실전 프로젝트 완성·배포<small>"AI를 제대로 활용하는" 개발 방식 체득</small></li>
+    <li><b>준비물</b> — Claude 유료 구독(또는 API 크레딧), Git/터미널 기본기</li>
+  </ul>
+</section>
+
+<!-- 5. 아이스브레이킹 -->
+<section class="slide bg-aurora">
+  <h2><span class="num">02</span>아이스브레이킹 🧊</h2>
+  <p class="sub" style="margin:0 0 32px">돌아가면서 가볍게! 한 사람당 2~3분</p>
+  <div class="grid cols-2">
+    <div class="card"><h3>1️⃣ 자기소개</h3><p>이름/닉네임, 하는 일·관심 분야, 익숙한 기술 스택</p></div>
+    <div class="card"><h3>2️⃣ AI 코딩 경험</h3><p>Claude Code / Cursor / Copilot… 써본 것 & 첫인상</p></div>
+    <div class="card"><h3>3️⃣ 만들고 싶은 것</h3><p>이번 스터디에서 완성하고 싶은 프로젝트 한 줄 소개</p></div>
+    <div class="card"><h3>4️⃣ 라이트닝 퀘스천</h3><p>다음 장에서 공개! 고민 금지, 3초 안에 바로 대답 ⚡</p></div>
+  </div>
+</section>
+
+<!-- 라이트닝 퀘스천 -->
+<section class="slide bg-aurora">
+  <h2><span class="num">02</span>라이트닝 퀘스천 ⚡</h2>
+  <p class="sub" style="margin:0 0 28px">돌아가면서 랜덤으로 하나씩 — 고민하면 지는 겁니다, 3초 컷!</p>
+  <div class="grid cols-3">
+    <div class="card"><h3>Q1 🌙</h3><p>다크모드 vs 라이트모드?</p></div>
+    <div class="card"><h3>Q2 🍜</h3><p>코딩할 때 최애 간식 or 야식은?</p></div>
+    <div class="card"><h3>Q3 🎧</h3><p>개발할 때 듣는 노래 or 유튜브는?</p></div>
+    <div class="card"><h3>Q4 🤖</h3><p>최근에 AI한테 시킨 가장 쓸데없는 일은?</p></div>
+    <div class="card"><h3>Q5 🏖️</h3><p>이번 방학, 코딩 빼고 제일 하고 싶은 것은?</p></div>
+    <div class="card"><h3>Q6 💸</h3><p>지금 통장에 1억 꽂히면 개발 계속 한다 vs 바로 논다?</p></div>
+  </div>
+</section>
+
+<!-- 6. 멤버 소개 1 -->
+<section class="slide bg-aurora">
+  <h2><span class="num">02</span>함께하는 멤버들 (1/2)</h2>
+  <div class="grid cols-3">
+    <div class="card member"><span class="name">임유섭 <span>seop0372</span></span><span class="goal">사이드 프로젝트 · 웹서비스 개발 목표</span><span><span class="tag">Python</span><span class="tag">AI 코딩 처음</span></span></div>
+    <div class="card member"><span class="name">최지원 <span>지니</span></span><span class="goal">백엔드·데이터 · CLI 도구 or 웹서비스</span><span><span class="tag">Java/Spring</span><span class="tag">React</span></span></div>
+    <div class="card member"><span class="name">인수빈 <span>수콩</span></span><span class="goal">웹서비스 개발 + 실제 유저 소규모 운영까지</span><span><span class="tag">Java/Spring</span><span class="tag">Hooks/Skills 관심</span></span></div>
+    <div class="card member"><span class="name">김영신 <span>니스</span></span><span class="goal">인프라(GPU 서버) 인턴 · 배포 자동화 목표</span><span><span class="tag">Java/Spring</span><span class="tag">Shell</span></span></div>
+    <div class="card member"><span class="name">이태우 <span>맥스</span></span><span class="goal">임베디드·백엔드 · 웹서비스 개발 목표</span><span><span class="tag">C++</span><span class="tag">AI 코딩 처음</span></span></div>
+  </div>
+</section>
+
+<!-- 7. 멤버 소개 2 -->
+<section class="slide bg-aurora">
+  <h2><span class="num">02</span>함께하는 멤버들 (2/2)</h2>
+  <div class="grid cols-3">
+    <div class="card member"><span class="name">강주영 <span>주디</span></span><span class="goal">백엔드·기획 · 개인 자동화 웹서비스 & 봇</span><span><span class="tag">React</span><span class="tag">Swift</span><span class="tag">C++</span></span></div>
+    <div class="card member"><span class="name">홍수진 <span>짜장</span></span><span class="goal">프론트엔드 · 퀄리티 좋은 사이드 프로젝트 완성</span><span><span class="tag">React</span><span class="tag">Cursor 경험</span></span></div>
+    <div class="card member"><span class="name">문소원 <span>위시</span></span><span class="goal">백엔드·데이터 분석 · 개발~배포 자동화 전체 사이클</span><span><span class="tag">Java/Spring</span><span class="tag">C++</span></span></div>
+    <div class="card member"><span class="name">장예나 <span>폴라</span></span><span class="goal">IT 창업·AI 엔지니어링 · 완성도 있는 웹앱 MVP</span><span><span class="tag">Python</span><span class="tag">Claude Max 사용 중</span></span></div>
+    <div class="card member"><span class="name">김영재 <span>밤</span></span><span class="goal">풀스택·창업 · 자체 웹서비스 런칭 목표</span><span><span class="tag">TypeScript</span><span class="tag">Claude Code 경험</span></span></div>
+  </div>
+</section>
+
+<!-- 8. 커리큘럼 전체 -->
+<section class="slide bg-earth">
+  <h2><span class="num">03</span>6주 커리큘럼 한눈에 보기</h2>
+  <div class="timeline">
+    <div class="week"><div class="w">WEEK 1</div><h4>OT & 설치</h4><p>Quickstart, CLI 기본, Terminal/IDE/Desktop/Web 세팅</p></div>
+    <div class="week"><div class="w">WEEK 2</div><h4>핵심 워크플로우</h4><p>기능 개발·버그 수정·git 커밋, CLAUDE.md, Hooks, Slash commands, MCP</p></div>
+    <div class="week p2"><div class="w">WEEK 3</div><h4>프로젝트 기획</h4><p>아이템 선정, 기획, 프로젝트 셋업</p></div>
+    <div class="week p2"><div class="w">WEEK 4</div><h4>개발 I</h4><p>핵심 기능 구현, AI 협업 워크플로우 정착</p></div>
+    <div class="week p2"><div class="w">WEEK 5</div><h4>개발 II</h4><p>심화 기능, 자동화(GitHub Actions 등)</p></div>
+    <div class="week p2"><div class="w">WEEK 6</div><h4>완성 & 발표</h4><p>배포, 결과 발표, 회고</p></div>
+  </div>
+  <div style="margin-top:36px">
+    <span class="pill" style="border-color:var(--accent)">Part 1 · 기본기 (1~2주)</span>
+    <span class="pill" style="border-color:var(--blue)">Part 2 · 실전 프로젝트 (3~6주)</span>
+  </div>
+</section>
+
+<!-- 9. Part 1 상세 -->
+<section class="slide bg-circuit">
+  <h2><span class="num">03</span>Part 1 — 기본기 (1~2주차)</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>1주차 · 설치 & 첫걸음</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; margin-top:8px">
+        <li>✅ 설치 — Terminal / IDE / Desktop / Web</li>
+        <li>✅ Quickstart — 첫 대화, 첫 코드 수정</li>
+        <li>✅ CLI 기본 — 모드, 단축키, 권한 시스템</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>2주차 · 핵심 워크플로우</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; margin-top:8px">
+        <li>✅ 기능 개발 · 버그 수정 · git 커밋 위임하기</li>
+        <li>✅ CLAUDE.md — 프로젝트 규칙 가르치기</li>
+        <li>✅ Hooks & Slash commands</li>
+        <li>✅ MCP — 외부 도구 연결</li>
+      </ul>
+    </div>
+  </div>
+  <p class="sub">📖 교재: Claude Code 공식 문서 (docs.anthropic.com) — 매주 해당 챕터 예습</p>
+</section>
+
+<!-- 10. Part 2 상세 -->
+<section class="slide bg-code">
+  <h2><span class="num">03</span>Part 2 — 실전 프로젝트 (3~6주차)</h2>
+  <ul class="big">
+    <li><b>그룹제 운영</b><small>두 그룹으로 나누어 진행 — 최용 멘토 그룹 / 최승위 멘토 그룹이 각 프로젝트를 전담 멘토링</small></li>
+    <li><b>3주차 · 기획 & 셋업</b><small>각자 아이템 확정 → Claude Code와 함께 기획서·레포 셋업</small></li>
+    <li><b>4~5주차 · 개발 & 심화</b><small>핵심 기능 구현 + Hooks/MCP/GitHub Actions 등 심화 기능을 내 프로젝트에 적용</small></li>
+    <li><b>6주차 · 완성 & 발표</b><small>배포하고, 만든 것과 배운 것(워크플로우)을 공유하는 최종 발표</small></li>
+  </ul>
+  <p class="sub">🎯 결과물: 배포된 나만의 프로젝트 1개 + 나만의 AI 개발 워크플로우</p>
+</section>
+
+<!-- 11. 진행 방식 & 규칙 -->
+<section class="slide bg-mountain">
+  <h2><span class="num">03</span>진행 방식 & 약속</h2>
+  <div class="grid cols-2">
+    <div class="card"><h3>📅 매주 정기 모임</h3><p>주 1회 온라인 세션 — 학습 내용 공유, 데모, 막힌 부분 해결</p></div>
+    <div class="card"><h3>📝 주간 미션</h3><p>매주 문서 예습 + 실습 과제, GitHub 이슈/PR로 인증</p></div>
+    <div class="card"><h3>💬 상시 소통</h3><p>막히면 바로 질문 — 삽질 공유가 최고의 학습 자료</p></div>
+    <div class="card"><h3>🤝 완주 목표</h3><p>6주 뒤 전원이 "배포된 프로젝트 1개"를 갖고 끝내기</p></div>
+  </div>
+</section>
+
+<!-- 세팅 ① 사전 준비 & 설치 -->
+<section class="slide bg-laptop">
+  <h2><span class="num">04</span>기본 세팅 ① — 사전 준비 & 설치</h2>
+  <div class="grid cols-2">
+    <div class="card">
+      <h3>✅ 사전 준비</h3>
+      <ul style="list-style:none; display:flex; flex-direction:column; gap:10px; margin-top:8px">
+        <li>· <b>Claude 유료 구독</b> (Pro/Max) 또는 API 크레딧</li>
+        <li>· <b>VS Code</b> 최신 버전</li>
+        <li>· <b>Node.js 18+</b> <span style="color:var(--muted)">(node --version 으로 확인)</span></li>
+        <li>· Git 설치 & GitHub 계정</li>
+      </ul>
+    </div>
+    <div class="code" style="font-size:17px">
+      <div><span class="c"># 1. Claude Code 설치</span></div>
+      <div><span class="p">$</span> npm install -g @anthropic-ai/claude-code</div>
+      <div>&nbsp;</div>
+      <div><span class="c"># 2. 설치 확인</span></div>
+      <div><span class="p">$</span> claude --version</div>
+      <div>&nbsp;</div>
+      <div><span class="c"># 3. 실행 & 로그인 (브라우저가 열립니다)</span></div>
+      <div><span class="p">$</span> claude</div>
+      <div><span class="p">&gt;</span> /login</div>
+    </div>
+  </div>
+  <p class="sub">💡 Windows는 WSL 권장 · 설치 막히면 바로 손 들어주세요, 화면 공유로 같이 해결합니다</p>
+</section>
+
+<!-- 세팅 ② VS Code 연동 -->
+<section class="slide bg-laptop">
+  <h2><span class="num">04</span>기본 세팅 ② — VS Code 연동</h2>
+  <ul class="big">
+    <li><b>확장 자동 설치</b><small>VS Code 내장 터미널(⌃`)에서 <code style="color:var(--green)">claude</code> 실행 → Claude Code 확장이 자동 설치됨 (마켓플레이스에서 "Claude Code" 수동 설치도 가능)</small></li>
+    <li><b>단축키로 열기</b><small>Mac <code style="color:var(--green)">Cmd+Esc</code> / Windows <code style="color:var(--green)">Ctrl+Esc</code> — 어디서든 Claude Code 패널 토글</small></li>
+    <li><b>컨텍스트 공유</b><small>에디터에서 코드 드래그하면 선택 영역이 자동으로 대화에 포함 · <code style="color:var(--green)">Cmd+Option+K</code>로 현재 파일 참조(@파일#라인) 삽입</small></li>
+    <li><b>Diff를 에디터에서</b><small>Claude가 제안한 수정이 VS Code diff 뷰어로 표시 → 검토 후 수락/거절</small></li>
+  </ul>
+</section>
+
+<!-- 세팅 ③ CLI 필수 조작법 -->
+<section class="slide bg-laptop">
+  <h2><span class="num">04</span>기본 세팅 ③ — CLI 필수 조작법</h2>
+  <div class="grid cols-2">
+    <div class="card"><h3>⇧ Shift+Tab · 모드 전환</h3><p style="font-size:16px">기본(매번 확인) → <b>auto-accept</b>(자동 수락) → <b>plan mode</b>(계획만 세우고 실행 안 함) 순환. 처음엔 기본 모드 추천!</p></div>
+    <div class="card"><h3>⎋ Esc · 긴급 정지</h3><p style="font-size:16px">Claude가 이상한 방향으로 가면 즉시 중단하고 방향 수정. Esc 두 번이면 이전 메시지로 돌아가 다시 시작</p></div>
+    <div class="card"><h3>🖼️ 이미지 붙여넣기</h3><p style="font-size:16px">스크린샷을 복사해서 붙여넣으면 에러 화면·디자인 시안을 보고 작업 가능</p></div>
+    <div class="card"><h3># 메모리 · ! 셸</h3><p style="font-size:16px"><b>#</b>으로 시작하면 CLAUDE.md에 규칙 저장, <b>!</b>로 시작하면 셸 명령을 바로 실행해 결과를 대화에 포함</p></div>
+  </div>
+  <p class="sub">💡 권한 요청이 뜨는 건 정상 — Claude는 파일 수정·명령 실행 전에 항상 허락을 구합니다</p>
+</section>
+
+<!-- 세팅 ④ 슬래시 커맨드 -->
+<section class="slide bg-laptop">
+  <h2><span class="num">04</span>기본 세팅 ④ — 자주 쓰는 슬래시 커맨드</h2>
+  <div class="code" style="font-size:18px">
+    <div><span class="p">/init</span>      <span class="c">— 프로젝트 분석해서 CLAUDE.md 자동 생성 (프로젝트마다 제일 먼저!)</span></div>
+    <div><span class="p">/model</span>     <span class="c">— 모델 변경 (Opus / Sonnet / Haiku)</span></div>
+    <div><span class="p">/clear</span>     <span class="c">— 대화 초기화 (새 작업 시작할 때)</span></div>
+    <div><span class="p">/compact</span>   <span class="c">— 대화 압축 (컨텍스트가 길어졌을 때)</span></div>
+    <div><span class="p">/cost</span>      <span class="c">— 이번 세션 토큰 사용량 확인</span></div>
+    <div><span class="p">/help</span>      <span class="c">— 전체 명령어 목록</span></div>
+    <div><span class="p">/login</span>     <span class="c">— 계정 로그인/전환</span></div>
+  </div>
+  <p class="sub">📌 오늘은 <b style="color:var(--text)">/init</b> 하나만 기억해도 충분 — 나머지는 2주차에 깊게 다룹니다</p>
+</section>
+
+<!-- 세팅 ③ 미니 튜토리얼 -->
+<section class="slide bg-terminal">
+  <h2><span class="num">04</span>기본 세팅 ⑤ — 15분 미니 튜토리얼 🏃</h2>
+  <p class="sub" style="margin:0 0 24px">아무 프로젝트나 VS Code로 열고, 아래를 순서대로 따라해봅니다</p>
+  <div class="grid cols-3">
+    <div class="card"><h3>STEP 1 · CLAUDE.md 생성</h3><p style="color:var(--muted)">/init</p><p style="font-size:15px; margin-top:8px">Claude가 프로젝트를 분석해 규칙 파일을 만드는 과정 관찰</p></div>
+    <div class="card"><h3>STEP 2 · 프로젝트 파악</h3><p style="color:var(--muted)">"이 프로젝트 구조를 설명해줘"</p><p style="font-size:15px; margin-top:8px">파일을 탐색하며 요약하는 과정 관찰하기</p></div>
+    <div class="card"><h3>STEP 3 · 작은 수정</h3><p style="color:var(--muted)">"README.md에 프로젝트 소개 섹션 추가해줘"</p><p style="font-size:15px; margin-top:8px">diff 뷰에서 변경 내용 확인 → 수락</p></div>
+    <div class="card"><h3>STEP 4 · 기능 만들기</h3><p style="color:var(--muted)">"구구단 출력하는 스크립트 작성해줘"</p><p style="font-size:15px; margin-top:8px">파일 생성 → 직접 실행해보기</p></div>
+    <div class="card"><h3>STEP 5 · 일부러 버그 내기</h3><p style="color:var(--muted)">"방금 코드에 버그 심고, 다시 찾아서 고쳐봐"</p><p style="font-size:15px; margin-top:8px">디버깅 과정을 구경하는 재미 🐛</p></div>
+    <div class="card"><h3>STEP 6 · git 커밋</h3><p style="color:var(--muted)">"지금까지 변경사항 커밋해줘"</p><p style="font-size:15px; margin-top:8px">커밋 메시지까지 알아서 — git도 위임 가능!</p></div>
+  </div>
+</section>
+
+<!-- 세팅 ⑥ 트러블슈팅 -->
+<section class="slide bg-terminal">
+  <h2><span class="num">04</span>기본 세팅 ⑥ — 막혔을 때 (트러블슈팅)</h2>
+  <ul class="big">
+    <li><b>command not found: claude</b><small>npm 글로벌 경로가 PATH에 없는 경우 — <code style="color:var(--green)">npm config get prefix</code> 확인 후 PATH에 추가, 또는 터미널 재시작</small></li>
+    <li><b>npm 권한 오류 (EACCES)</b><small>sudo 대신 npm 글로벌 디렉토리를 홈으로 변경하는 것을 권장 — 같이 해결해드립니다</small></li>
+    <li><b>Windows에서 잘 안 될 때</b><small>WSL(Ubuntu) 설치 후 WSL 안에서 Node + Claude Code 설치 권장</small></li>
+    <li><b>로그인 루프 / 크레딧 오류</b><small>구독 계정과 브라우저 로그인 계정이 다른 경우가 대부분 — /login 으로 계정 재선택</small></li>
+  </ul>
+  <p class="sub">🛟 그래도 안 되면 → 화면 공유 + 멘토 2명이 달라붙습니다</p>
+</section>
+
+<!-- 세팅 ④ 체크리스트 -->
+<section class="slide bg-terminal">
+  <h2><span class="num">04</span>기본 세팅 ⑦ — 오늘의 완료 체크리스트</h2>
+  <ul class="big">
+    <li><b>설치 & 로그인</b> — <code style="color:var(--green)">claude --version</code> 정상 출력 + /login 완료</li>
+    <li><b>VS Code 연동</b> — 확장 설치 & <code style="color:var(--green)">Cmd+Esc</code>로 패널 열림</li>
+    <li><b>CLAUDE.md 생성</b> — <code style="color:var(--green)">/init</code> 실행해보기</li>
+    <li><b>첫 대화 & 첫 수정</b> — 프로젝트 설명 받고, diff 수락까지 완료</li>
+    <li><b>git 커밋 위임</b> — Claude에게 커밋 맡겨보기</li>
+  </ul>
+  <p class="sub">🙋 하나라도 안 되는 분 → 세션 끝나기 전에 같이 해결하고 갑니다!</p>
+</section>
+
+<!-- 14. 다음 주 & 마무리 -->
+<section class="slide bg-cosmos">
+  <h2><span class="num">05</span>다음 주까지 할 일</h2>
+  <ul class="big">
+    <li><b>공식 문서 Quickstart + CLI 기본 챕터 읽기</b></li>
+    <li><b>Claude Code로 아무 프로젝트나 하나 건드려보기</b><small>기존 코드 설명시키기, 작은 기능 추가, 버그 수정 등 — 뭐든 OK</small></li>
+    <li><b>"신기했던 것 / 이상했던 것" 각 1개씩 준비</b><small>다음 세션 시작할 때 공유합니다</small></li>
+  </ul>
+  <p class="sub" style="margin-top:48px; font-size:30px; color:var(--text)">6주 뒤, <b style="color:var(--accent)">AI에게 일 잘 시키는 개발자</b>가 되어 있을 여러분을 응원합니다 🚀</p>
+</section>
+
+<div class="footer">
+  <span>Claude Code 완전 정복 · 1주차 OT</span>
+  <span id="pageNum"></span>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  let idx = 0;
+  function show(i) {
+    idx = Math.max(0, Math.min(slides.length - 1, i));
+    slides.forEach((s, j) => s.classList.toggle('active', j === idx));
+    document.getElementById('pageNum').textContent = (idx + 1) + ' / ' + slides.length;
+    document.getElementById('progress').style.width = ((idx + 1) / slides.length * 100) + '%';
+  }
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight', ' ', 'PageDown'].includes(e.key)) show(idx + 1);
+    if (['ArrowLeft', 'PageUp'].includes(e.key)) show(idx - 1);
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+  });
+  document.addEventListener('click', e => {
+    if (e.clientX > window.innerWidth / 2) show(idx + 1); else show(idx - 1);
+  });
+  show(0);
+</script>
+</body>
+</html>
