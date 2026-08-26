@@ -2,6 +2,7 @@
 description: 변경사항을 컨벤션에 맞게 커밋
 allowed-tools: Bash(git:*)
 ---
+
 현재 상태: !`git status`
 변경 내용: !`git diff --staged`
 
