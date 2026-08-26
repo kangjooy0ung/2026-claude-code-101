@@ -1,28 +1,25 @@
 # OS
 .DS_Store
 Thumbs.db
-
 # Editor
 .vscode/
 .idea/
 *.swp
-
 # Env / secrets
 .env
 .env.*
 *.key
 !.env.example
-
 # Dependencies
 node_modules/
 __pycache__/
 *.pyc
 venv/
 .venv/
-
 # OMC / Claude Code runtime state
 .omc/
 .claude/settings.local.json
-
 # Logs
 *.log
+test.db
+.playwright-mcp/
