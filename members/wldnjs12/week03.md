@@ -8,7 +8,7 @@
 Java 17 + Spring Boot 3 + Spring Data JPA + MySQL / Flutter(모바일 + Web) / Claude API(Vision + Text) / 공공 날씨 API + 네이버쇼핑 API / 배포: Vercel
 + Railway
 
-## 이번 주 진행 (6주차 — 마무리 & 데모 단계)
+## 이번 주 진행
 - **로그인/배포 인프라**: Google OAuth2 로그인 + JWT 세션(리프레시 토큰 동시 요청 경쟁 조건 수정), Railway(백엔드)·Vercel(프론트) 배포 설정 및 실패 원인 수정, Cloudflare R2  
   이미지 스토리지 연동
 - **추천 결과 확정 플로우**: "오늘의 코디로 결정하기" 확정 API, 캘린더 착용샷 직접 등록, 트렌드 리포트 위젯, 네이버쇼핑 연동 '+1 아이템' 구매 링크 노출
